@@ -41,6 +41,20 @@
       <artifactId>junit-jupiter-params</artifactId>
       <scope>test</scope>
     </dependency>
+    <!-- Dependency for managing OIDC connect -->
+    <dependency>
+      <groupId>com.nimbusds</groupId>
+      <artifactId>oauth2-oidc-sdk</artifactId>
+      <version>11.23.1</version>
+      <!--<scope>runtime</scope>-->
+    </dependency>
+
+    <dependency>
+      <groupId>com.nimbusds</groupId>
+      <artifactId>nimbus-jose-jwt</artifactId>
+      <version>10.0.2</version>
+    </dependency>
+    
   </dependencies>
 
   <build>
@@ -85,7 +99,32 @@
           <artifactId>maven-project-info-reports-plugin</artifactId>
           <version>3.6.1</version>
         </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>properties-maven-plugin</artifactId>
+          <version>1.2.1</version>
+          <executions>
+            <execution>
+              <phase>initialize</phase>
+              <goals>
+                <goal>read-project-properties</goal>
+              </goals>
+              <configuration>
+                <useDefaultValues>true</useDefaultValues>
+                <files>
+                  <file>${project.basedir}/.env</file>
+                  <file>${project.basedir}/src/main/resources/application.properties</file>
+                </files>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
       </plugins>
     </pluginManagement>
+    <resources>
+      <resource>
+        <directory>${project.basedir}/src/main/resources/</directory>
+      </resource>
+    </resources>
   </build>
 </project>
