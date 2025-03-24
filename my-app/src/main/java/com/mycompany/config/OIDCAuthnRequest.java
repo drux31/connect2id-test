@@ -1,6 +1,7 @@
 package com.mycompany.config;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.*;
 
 import com.nimbusds.oauth2.sdk.*;
@@ -46,6 +47,11 @@ public class OIDCAuthnRequest {
         URI requestURI = request.toURI();
         System.out.println(requestURI);
         
+
+        HttpURLConnection conn = (HttpURLConnection)(requestURI.toURL().openConnection());
+        InputStream inputStream = conn.getInputStream();
+        System.out.println(new String(inputStream.readAllBytes()));
+        inputStream.close();
         
         /* Process the request */
         //Response response = request.getIDTokenHint();
