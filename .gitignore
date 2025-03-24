@@ -1,0 +1,5 @@
+.mvn
+.env
+*.env
+.properties
+.config
