@@ -5,6 +5,7 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 
 import com.mycompany.config.OIDCAuthnRequest;
+import com.nimbusds.oauth2.sdk.ParseException;
 
 /**
  * Hello world!
@@ -18,6 +19,8 @@ public class App {
         } catch (MalformedURLException e) {
             System.out.println(e.getMessage());
         } catch (IOException e) {
+            System.out.println(e.getMessage());
+        } catch (ParseException e) {
             System.out.println(e.getMessage());
         }
         

@@ -3,6 +3,9 @@ package com.mycompany.config;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.*;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse.BodyHandlers;
 
 import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.openid.connect.sdk.*;
@@ -32,8 +35,9 @@ public class OIDCAuthnRequest {
     }
 
     //public AuthorizationCode getAuthCode() throws URISyntaxException, MalformedURLException, IOException {
-    public void getAuthCode() throws URISyntaxException, MalformedURLException, IOException {
+    public void getAuthCode() throws URISyntaxException, MalformedURLException, IOException, ParseException {
         AuthorizationCode code = null;
+        AuthenticationResponse authResp = null;
 
         // generate the auhtentication request
         AuthenticationRequest request = new AuthenticationRequest.Builder(
@@ -46,12 +50,13 @@ public class OIDCAuthnRequest {
         // print the request uri
         URI requestURI = request.toURI();
         System.out.println(requestURI);
-        
+               
 
-        HttpURLConnection conn = (HttpURLConnection)(requestURI.toURL().openConnection());
-        InputStream inputStream = conn.getInputStream();
-        System.out.println(new String(inputStream.readAllBytes()));
-        inputStream.close();
+        authResp = AuthenticationResponseParser.parse(requestURI);
+
+        AuthenticationSuccessResponse successResponse = (AuthenticationSuccessResponse) authResp;
+        code = successResponse.getAuthorizationCode();
+        System.out.println(code);
         
         /* Process the request */
         //Response response = request.getIDTokenHint();
