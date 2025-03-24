@@ -1,5 +1,6 @@
 package com.mycompany.config;
 
+import java.io.IOException;
 import java.net.*;
 
 import com.nimbusds.oauth2.sdk.*;
@@ -20,14 +21,17 @@ public class OIDCAuthnRequest {
 
     public OIDCAuthnRequest() throws URISyntaxException {
         this.loadPropertiesFIle = new LoadPropertiesFIle();
+        System.out.println(loadPropertiesFIle.toString());
         clientID = new ClientID(loadPropertiesFIle.getCleintID());
+        System.out.println(clientID);
         callback = new URI(loadPropertiesFIle.getCallBackURL());
         state = new State();
         nonce = new Nonce();
         oidcProviderURI = loadPropertiesFIle.getOidcProviderURL();
     }
 
-    public AuthorizationCode getAuthCode() throws URISyntaxException {
+    //public AuthorizationCode getAuthCode() throws URISyntaxException, MalformedURLException, IOException {
+    public void getAuthCode() throws URISyntaxException, MalformedURLException, IOException {
         AuthorizationCode code = null;
 
         // generate the auhtentication request
@@ -36,11 +40,20 @@ public class OIDCAuthnRequest {
             new Scope("openid"),
             clientID,
             callback
-        ).endpointURI(new URI(oidcProviderURI)).state(state).nonce(nonce).build();
+        ).endpointURI(new URI(oidcProviderURI)).state(state).nonce(nonce).responseMode(new ResponseMode("form_post")).build();
 
         // print the request uri
-        System.out.println(request.toURI());
-        return code ;
+        URI requestURI = request.toURI();
+        System.out.println(requestURI);
+        
+        
+        /* Process the request */
+        //Response response = request.getIDTokenHint();
+
+        //return code ;
     }
 
+    private void parseAuthResponse(URI requestUri) {
+
+    }
 }

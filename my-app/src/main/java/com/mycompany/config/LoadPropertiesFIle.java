@@ -15,7 +15,7 @@ public class LoadPropertiesFIle {
         Properties properties = new Properties();
         try {
             
-            String propFile = "application.properties";
+            String propFile = "env.properties";
 
             InputStream inputStream = getClass().getClassLoader().getResourceAsStream(propFile);
             if (inputStream != null) {
@@ -34,6 +34,7 @@ public class LoadPropertiesFIle {
      * @return URL string value from the properties
      */
     public String getOidcProviderURL() {
+        System.out.println(this.getProperties().getProperty("oidcprovider.url"));
         return this.getProperties().getProperty("oidcprovider.url");
     }
 
