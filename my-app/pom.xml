@@ -6,16 +6,18 @@
   <groupId>com.mycompany.app</groupId>
   <artifactId>my-app</artifactId>
   <version>1.0-SNAPSHOT</version>
-
+  <packaging>war</packaging>
   <name>my-app</name>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <jettyVersion>12.0.18</jettyVersion>
     <maven.compiler.release>17</maven.compiler.release>
+    <!--
     <exec.mainClass>
       com.mycompany.app.App
     </exec.mainClass>
+    -->
   </properties>
 
   <dependencyManagement>
@@ -60,7 +62,12 @@
       <artifactId>jetty-server</artifactId>
       <version>${jettyVersion}</version>
     </dependency>
-    
+    <dependency>
+      <groupId>jakarta.servlet</groupId>
+      <artifactId>jakarta.servlet-api</artifactId>
+      <version>6.0.0</version>
+      <scope>provided</scope>
+    </dependency>
   </dependencies>
 
   <build>
@@ -105,6 +112,7 @@
           <artifactId>maven-project-info-reports-plugin</artifactId>
           <version>3.6.1</version>
         </plugin>
+        <!--
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>exec-maven-plugin</artifactId>
@@ -118,6 +126,12 @@
           <configuration>
             <mainClass>com.mycompany.app.App</mainClass>
           </configuration>
+        </plugin>
+        -->
+        <plugin>
+          <groupId>org.eclipse.jetty.ee10</groupId>
+          <artifactId>jetty-ee10-maven-plugin</artifactId>
+          <version>${jettyVersion}</version>
         </plugin>
       </plugins>
     </pluginManagement>
