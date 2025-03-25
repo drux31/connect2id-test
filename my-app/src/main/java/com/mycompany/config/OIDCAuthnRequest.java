@@ -1,11 +1,6 @@
 package com.mycompany.config;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.*;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse.BodyHandlers;
 
 import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.openid.connect.sdk.*;
@@ -23,24 +18,29 @@ public class OIDCAuthnRequest {
     private State state;
     private String oidcProviderURI ;
 
-    public OIDCAuthnRequest() throws URISyntaxException {
+
+    public OIDCAuthnRequest() {
         this.loadPropertiesFIle = new LoadPropertiesFIle();
         System.out.println(loadPropertiesFIle.toString());
         clientID = new ClientID(loadPropertiesFIle.getCleintID());
         System.out.println(clientID);
-        callback = new URI(loadPropertiesFIle.getCallBackURL());
         state = new State();
         nonce = new Nonce();
         oidcProviderURI = loadPropertiesFIle.getOidcProviderURL();
     }
 
-    //public AuthorizationCode getAuthCode() throws URISyntaxException, MalformedURLException, IOException {
-    public void getAuthCode() {
-        AuthorizationCode code = null;
-        AuthenticationResponse authResp = null;
+    /**
+     * Get the OIDC provider Authorisation endpoint URI
+     * @return URI 
+     */
+    public String getEndPointURI() {
+
+        AuthenticationRequest request = null;
+        URI requestURI = null;
         try {
             // generate the auhtentication request
-            AuthenticationRequest request = new AuthenticationRequest.Builder(
+            callback = new URI(loadPropertiesFIle.getCallBackURL());
+            request = new AuthenticationRequest.Builder(
                 new ResponseType("code"),
                 new Scope("openid"),
                 clientID,
@@ -48,27 +48,38 @@ public class OIDCAuthnRequest {
             ).endpointURI(new URI(oidcProviderURI)).state(state).nonce(nonce).responseMode(new ResponseMode("form_post")).build();
 
             // print the request uri
-            URI requestURI = request.toURI();
+            requestURI = request.toURI();
             System.out.println(requestURI);
-                
-
-            authResp = AuthenticationResponseParser.parse(requestURI);
-
-            AuthenticationSuccessResponse successResponse = (AuthenticationSuccessResponse) authResp;
-            code = successResponse.getAuthorizationCode();
-            System.out.println(code);
+        
         } catch (URISyntaxException e) {
-            System.out.println(e.getMessage());
-        } catch (ParseException e) {
             System.out.println(e.getMessage());
         }
         /* Process the request */
         //Response response = request.getIDTokenHint();
 
-        //return code ;
+        return requestURI.toString();
     }
 
-    private void parseAuthResponse(URI requestUri) {
+    /**
+     * Check that the response is valid 
+     * @param response
+     * @return true or false whether is a valid response or not
+     */
+    public boolean isValid(AuthenticationResponse response) {
+        
+        //check the state - return false if different from the initial one
+        if (! response.getState().equals(state)){
+            System.err.println("Unexpected authentication response");
+            return false;
+        }
 
+        // check te instance - return false if diferent from AuthenticationResponse
+        if (response instanceof AuthenticationErrorResponse) {
+            System.err.println(response.toErrorResponse().getErrorObject());
+            return false;
+        }
+
+        // if valid response, return true
+        return true;
     }
 }

@@ -1,5 +1,5 @@
 {
-	"name": "natter-api",
+	"name": "connect2id-test",
 	"build": {
 		"dockerfile": "devcontainer.Dockerfile"
 	},
