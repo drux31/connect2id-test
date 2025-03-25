@@ -35,29 +35,33 @@ public class OIDCAuthnRequest {
     }
 
     //public AuthorizationCode getAuthCode() throws URISyntaxException, MalformedURLException, IOException {
-    public void getAuthCode() throws URISyntaxException, MalformedURLException, IOException, ParseException {
+    public void getAuthCode() {
         AuthorizationCode code = null;
         AuthenticationResponse authResp = null;
+        try {
+            // generate the auhtentication request
+            AuthenticationRequest request = new AuthenticationRequest.Builder(
+                new ResponseType("code"),
+                new Scope("openid"),
+                clientID,
+                callback
+            ).endpointURI(new URI(oidcProviderURI)).state(state).nonce(nonce).responseMode(new ResponseMode("form_post")).build();
 
-        // generate the auhtentication request
-        AuthenticationRequest request = new AuthenticationRequest.Builder(
-            new ResponseType("code"),
-            new Scope("openid"),
-            clientID,
-            callback
-        ).endpointURI(new URI(oidcProviderURI)).state(state).nonce(nonce).responseMode(new ResponseMode("form_post")).build();
+            // print the request uri
+            URI requestURI = request.toURI();
+            System.out.println(requestURI);
+                
 
-        // print the request uri
-        URI requestURI = request.toURI();
-        System.out.println(requestURI);
-               
+            authResp = AuthenticationResponseParser.parse(requestURI);
 
-        authResp = AuthenticationResponseParser.parse(requestURI);
-
-        AuthenticationSuccessResponse successResponse = (AuthenticationSuccessResponse) authResp;
-        code = successResponse.getAuthorizationCode();
-        System.out.println(code);
-        
+            AuthenticationSuccessResponse successResponse = (AuthenticationSuccessResponse) authResp;
+            code = successResponse.getAuthorizationCode();
+            System.out.println(code);
+        } catch (URISyntaxException e) {
+            System.out.println(e.getMessage());
+        } catch (ParseException e) {
+            System.out.println(e.getMessage());
+        }
         /* Process the request */
         //Response response = request.getIDTokenHint();
 
