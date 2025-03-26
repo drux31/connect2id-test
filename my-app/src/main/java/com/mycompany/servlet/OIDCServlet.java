@@ -13,6 +13,7 @@ import com.nimbusds.openid.connect.sdk.AuthenticationResponse;
 import com.nimbusds.openid.connect.sdk.AuthenticationResponseParser;
 
 import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -35,7 +36,7 @@ public class OIDCServlet extends HttpServlet {
         response.sendRedirect(oidcAuthnRequest.getEndPointURI());
     }  
 
-     @Override
+    @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
         // Create an authentication response from the respone callback
@@ -60,10 +61,16 @@ public class OIDCServlet extends HttpServlet {
         // print the authCode
         Object data = authCode.toString();
         */
-        System.out.println(request.getMethod() + " " + request.toString() + "\n");
-        request.setAttribute("authCode", extractPostRequestBody(request));
-        RequestDispatcher rs = request.getRequestDispatcher("welcome");
-        rs.forward(request, response);
+        //System.out.println(request.getMethod() + " " + request.getHeader("Host") + request.getRequestURI() + "\n" + request.toString() + "\n");
+        //System.out.println(request.getRequestURL());
+        String body = extractPostRequestBody(request);
+        //System.out.println("Body request: " + body);
+        //request.setAttribute("authCode", body);
+        request.getSession().setAttribute("authCode", body);        
+        //RequestDispatcher rs = request.getRequestDispatcher(request.getContextPath() + "/welcome");
+        //rs.forward(request, response);
+        response.sendRedirect(request.getContextPath() + "/protected/welcome");
+        // new ProtectedServlet().doGet(request, response);
     }
 
     static String extractPostRequestBody(HttpServletRequest request) {

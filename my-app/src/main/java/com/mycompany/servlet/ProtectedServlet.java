@@ -17,14 +17,16 @@ public class ProtectedServlet extends HttpServlet{
                 
         PrintWriter out = response.getWriter();
         
-        String authCode = request.getParameter("authCode");
+        //String authCode = (String)request.getAttribute("authCode");
+        String authCode = (String) request.getSession().getAttribute("authCode"); 
+
         out.append("<!DOCTYPE html>\r\n")
             .append("<html>\r\n")
             .append(" <head>\r\n")
             .append(" <title>Protected resources</title>\r\n")
             .append(" </head>\r\n")
             .append(" <body>\r\n")
-            .append(" Authorisation Code, ").append(authCode).append("!<br/><br/>\r\n")
+            .append(" Authorisation Code: ").append(authCode).append("!<br/><br/>\r\n")
             .append(" <form action=\"greeting\" method=\"POST\">\r\n")
             .append(" </body>\r\n")
             .append("</html>\r\n");
