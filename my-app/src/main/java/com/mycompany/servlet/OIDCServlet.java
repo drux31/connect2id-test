@@ -40,13 +40,14 @@ public class OIDCServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
         // Create an authentication response from the respone callback
-        /*
         AuthenticationResponse authResponse = null;
         AuthorizationCode authCode = null ;
         try {
             System.out.println(request.toString());
-            authResponse = AuthenticationResponseParser.parse(new URI(request.getRequestURI()));
-            System.out.println(request.getRequestURI());
+            String reqURL = request.getRequestURL().toString() + "?" + extractPostRequestBody(request);
+            System.out.println("callback: " + reqURL);
+            authResponse = AuthenticationResponseParser.parse(new URI(reqURL));
+            
 
         } catch (ParseException | URISyntaxException e) {
             e.printStackTrace();
@@ -56,17 +57,16 @@ public class OIDCServlet extends HttpServlet {
         if (oidcAuthnRequest.isValid(authResponse)) {
             authCode = authResponse.toSuccessResponse().getAuthorizationCode();
         }
-
         // request access token
         // print the authCode
         Object data = authCode.toString();
-        */
+    
         //System.out.println(request.getMethod() + " " + request.getHeader("Host") + request.getRequestURI() + "\n" + request.toString() + "\n");
         //System.out.println(request.getRequestURL());
-        String body = extractPostRequestBody(request);
+        //String body = extractPostRequestBody(request);
         //System.out.println("Body request: " + body);
         //request.setAttribute("authCode", body);
-        request.getSession().setAttribute("authCode", body);        
+        request.getSession().setAttribute("authCode", data);        
         //RequestDispatcher rs = request.getRequestDispatcher(request.getContextPath() + "/welcome");
         //rs.forward(request, response);
         response.sendRedirect(request.getContextPath() + "/protected/welcome");
