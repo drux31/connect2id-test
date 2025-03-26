@@ -3,6 +3,8 @@ package com.mycompany.servlet;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Enumeration;
+import java.util.Scanner;
 
 import com.mycompany.config.OIDCAuthnRequest;
 import com.nimbusds.oauth2.sdk.AuthorizationCode;
@@ -25,20 +27,25 @@ public class OIDCServlet extends HttpServlet {
      *  Authentication page (if not already authenticated)
      */
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
         // redirect to OIDC provider for authorisation
-        
+        System.out.println(oidcAuthnRequest.getEndPointURI());
+        //response.setHeader("Location", oidcAuthnRequest.getEndPointURI());
+        response.setStatus(302);
         response.sendRedirect(oidcAuthnRequest.getEndPointURI());
     }  
 
      @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
         // Create an authentication response from the respone callback
+        /*
         AuthenticationResponse authResponse = null;
         AuthorizationCode authCode = null ;
         try {
+            System.out.println(request.toString());
             authResponse = AuthenticationResponseParser.parse(new URI(request.getRequestURI()));
+            System.out.println(request.getRequestURI());
 
         } catch (ParseException | URISyntaxException e) {
             e.printStackTrace();
@@ -52,10 +59,32 @@ public class OIDCServlet extends HttpServlet {
         // request access token
         // print the authCode
         Object data = authCode.toString();
-        request.setAttribute("authCode", data);
+        */
+        System.out.println(request.getMethod() + " " + request.toString() + "\n");
+        request.setAttribute("authCode", extractPostRequestBody(request));
         RequestDispatcher rs = request.getRequestDispatcher("welcome");
         rs.forward(request, response);
+    }
 
+    static String extractPostRequestBody(HttpServletRequest request) {
+        String res = null;
+        if ("POST".equalsIgnoreCase(request.getMethod())) {
+            
+            System.out.println("Print headers");
+            Enumeration<String> headerNames = request.getHeaderNames();
+            while(headerNames.hasMoreElements()) {
+                String headerName = (String)headerNames.nextElement();
+                System.out.println(headerName + ": " + request.getHeader(headerName));
+            }
+            // Get the body content
+            try (Scanner s = new Scanner(request.getInputStream(), "UTF-8").useDelimiter("\\A")) {
+                res = s.hasNext() ? s.next() : "";
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+           System.out.println(res);
+        }
+        return res;
     }
 
 }

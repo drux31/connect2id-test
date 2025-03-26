@@ -19,7 +19,7 @@
     <servlet-class>com.mycompany.servlet.OIDCServlet</servlet-class>
   </servlet>
   <servlet>
-    <servlet-name>Welcome</servlet-name>
+    <servlet-name>welcome</servlet-name>
     <servlet-class>com.mycompany.servlet.ProtectedServlet</servlet-class>
   </servlet>
   <servlet-mapping>
@@ -33,9 +33,10 @@
   <servlet-mapping>
     <servlet-name>callback</servlet-name>
     <url-pattern>/callback</url-pattern>
+    <http-method>POST</http-method>
   </servlet-mapping>
   <servlet-mapping>
-        <servlet-name>Welcome</servlet-name>
+        <servlet-name>welcome</servlet-name>
         <url-pattern>/protected/welcome</url-pattern>
         <dispatcher>REQUEST</dispatcher>
   </servlet-mapping>

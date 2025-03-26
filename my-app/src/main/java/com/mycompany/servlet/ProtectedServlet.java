@@ -10,7 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 public class ProtectedServlet extends HttpServlet{
     
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         
         response.setContentType("text/html");
         response.setCharacterEncoding("UTF-8");

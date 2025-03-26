@@ -1,9 +1,13 @@
 package com.mycompany.config;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.*;
+import java.util.Scanner;
 
 import com.nimbusds.oauth2.sdk.*;
 import com.nimbusds.openid.connect.sdk.*;
+import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 import com.nimbusds.oauth2.sdk.id.*;
 
 /**
@@ -45,11 +49,11 @@ public class OIDCAuthnRequest {
                 new Scope("openid"),
                 clientID,
                 callback
-            ).endpointURI(new URI(oidcProviderURI)).state(state).nonce(nonce).responseMode(new ResponseMode("form_post")).build();
+            ).endpointURI(getProviderMetadata().getAuthorizationEndpointURI()).state(state).nonce(nonce).responseMode(new ResponseMode("form_post")).build();
 
             // print the request uri
             requestURI = request.toURI();
-            System.out.println(requestURI);
+            System.out.println("Authz URI: " + requestURI);
         
         } catch (URISyntaxException e) {
             System.out.println(e.getMessage());
@@ -81,5 +85,43 @@ public class OIDCAuthnRequest {
 
         // if valid response, return true
         return true;
+    }
+
+    /**
+     * Get the provider info from wel-known configuration endpoint
+     * @return - a string with the provider info configuration
+     */
+    private OIDCProviderMetadata getProviderMetadata() {
+
+        InputStream stream = null ;
+        URI issuerURI = null;
+        URL providerConfigurationURL = null;
+        OIDCProviderMetadata providerMetadata = null;
+
+        try {
+            // Get the issuer URI witch the default OIDC provider URI
+            issuerURI = new URI("https://" + oidcProviderURI);
+            System.out.println("OIDC provider URI: " + issuerURI);
+            // resolve the well-known config endpoint
+            providerConfigurationURL = issuerURI.resolve("/.well-known/openid-configuration").toURL();
+            // get the data
+            stream = providerConfigurationURL.openStream();
+
+            String providerInfo = null ;
+            try (Scanner s = new Scanner(stream)) {
+                providerInfo = s.useDelimiter("\\A").hasNext() ? s.next() : "";
+            }
+            // parse into metadata
+            providerMetadata = OIDCProviderMetadata.parse(providerInfo);
+            //System.out.println("provider info: " + providerInfo);
+        }
+        catch (URISyntaxException | MalformedURLException e ) {
+            System.err.println(e.getMessage());
+        } catch (IOException e) {
+            System.err.println(e.getMessage());
+        } catch (ParseException e) {
+            System.err.println(e.getMessage());
+        }  
+        return providerMetadata;
     }
 }
