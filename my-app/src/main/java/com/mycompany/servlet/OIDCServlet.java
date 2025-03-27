@@ -7,19 +7,21 @@ import java.util.Enumeration;
 import java.util.Scanner;
 
 import com.mycompany.config.OIDCAuthnRequest;
+import com.nimbusds.jwt.JWT;
 import com.nimbusds.oauth2.sdk.AuthorizationCode;
-import com.nimbusds.oauth2.sdk.AuthorizationCodeGrant;
-import com.nimbusds.oauth2.sdk.AuthorizationGrant;
 import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.token.AccessToken;
+import com.nimbusds.oauth2.sdk.token.RefreshToken;
 import com.nimbusds.openid.connect.sdk.AuthenticationResponse;
 import com.nimbusds.openid.connect.sdk.AuthenticationResponseParser;
+import com.nimbusds.openid.connect.sdk.OIDCTokenResponse;
+import com.nimbusds.openid.connect.sdk.claims.UserInfo;
 
-import jakarta.servlet.RequestDispatcher;
-import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 
 public class OIDCServlet extends HttpServlet {
 
@@ -45,12 +47,13 @@ public class OIDCServlet extends HttpServlet {
         AuthenticationResponse authResponse = null;
         AuthorizationCode authCode = null ;
         URI callback = null;
+        OIDCTokenResponse tokenResponse = null;
         try {
             System.out.println(request.toString());
             String reqURL = request.getRequestURL().toString() + "?" + extractPostRequestBody(request);
             System.out.println("callback: " + reqURL);
             authResponse = AuthenticationResponseParser.parse(new URI(reqURL));
-            callback = new URI (request.getRequestURL().toString());
+            //callback = new URI (request.getRequestURL().toString());
 
         } catch (ParseException | URISyntaxException e) {
             e.printStackTrace();
@@ -61,22 +64,35 @@ public class OIDCServlet extends HttpServlet {
         if (oidcAuthnRequest.isValid(authResponse)) {
             authCode = authResponse.toSuccessResponse().getAuthorizationCode();
         }
-
-
-        // Construct the code grant from the code obtained from the authz endpoint
+        String subject = null;
+        UserInfo userInfo = null;
+        // Get the token response using the code
         if (authCode != null) {
-            AuthorizationGrant codeGrant = new AuthorizationCodeGrant(authCode, callback);
+            tokenResponse = oidcAuthnRequest.requestToken(request.getRequestURL().toString(), authCode);
+
+            //get the ID and access token, the server may also return a refresh token
+            JWT idToken = tokenResponse.getOIDCTokens().getIDToken();
+            AccessToken accessToken = tokenResponse.getOIDCTokens().getAccessToken();
+            RefreshToken refreshToken = tokenResponse.getOIDCTokens().getRefreshToken();
+
+            if (oidcAuthnRequest.isValidToken(idToken)) {
+                subject = oidcAuthnRequest.getLoggedInUser();
+                userInfo = oidcAuthnRequest.getUserInfoClaims(accessToken);
+            }
         }
+        
+        // Process the user information
+        subject = userInfo.getSubject().toString();
+        String email = userInfo.getEmailAddress();
+        String name = userInfo.getName();
 
+        // Set session information
+        request.getSession().setAttribute("userSubject", subject);
+        request.getSession().setAttribute("userEmail", email);
+        request.getSession().setAttribute("userName", name);
 
-        // request access token
-        // print the authCode
-        Object data = authCode.toString();
-        request.getSession().setAttribute("authCode", data);
-
-
+        // redirect to the protected resource
         response.sendRedirect(request.getContextPath() + "/protected/welcome");
-        // new ProtectedServlet().doGet(request, response);
     }
 
     static String extractPostRequestBody(HttpServletRequest request) {
