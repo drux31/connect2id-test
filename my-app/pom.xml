@@ -51,6 +51,7 @@
       <version>11.23.1</version>
       <!--<scope>runtime</scope>-->
     </dependency>
+    <!-- depencency for singing and validating tokens -->
     <dependency>
       <groupId>com.nimbusds</groupId>
       <artifactId>nimbus-jose-jwt</artifactId>
@@ -92,7 +93,7 @@
           <version>3.3.0</version>
         </plugin>
         <plugin>
-          <artifactId>maven-jar-plugin</artifactId>
+          <artifactId>maven-war-plugin</artifactId>
           <version>3.4.2</version>
         </plugin>
         <plugin>

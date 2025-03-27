@@ -6,6 +6,9 @@ import java.net.*;
 import java.util.Scanner;
 
 import com.nimbusds.oauth2.sdk.*;
+import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
+import com.nimbusds.oauth2.sdk.auth.ClientSecretBasic;
+import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.openid.connect.sdk.*;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 import com.nimbusds.oauth2.sdk.id.*;
@@ -18,6 +21,7 @@ public class OIDCAuthnRequest {
     private LoadPropertiesFIle loadPropertiesFIle;
     private ClientID clientID ;
     private URI callback ;
+    private Secret clientSecret;
     private Nonce nonce;
     private State state;
     private String oidcProviderURI ;
@@ -26,8 +30,9 @@ public class OIDCAuthnRequest {
     public OIDCAuthnRequest() {
         this.loadPropertiesFIle = new LoadPropertiesFIle();
         System.out.println(loadPropertiesFIle.toString());
-        clientID = new ClientID(loadPropertiesFIle.getCleintID());
+        clientID = new ClientID(loadPropertiesFIle.getClientID());
         System.out.println(clientID);
+        clientSecret = new Secret(loadPropertiesFIle.getClientSecret());
         state = new State();
         nonce = new Nonce();
         oidcProviderURI = loadPropertiesFIle.getOidcProviderURL();
@@ -123,5 +128,29 @@ public class OIDCAuthnRequest {
             System.err.println(e.getMessage());
         }  
         return providerMetadata;
+    }
+
+    /**
+     *  construct the token request usign the code grant
+     *  @return - OIDCTokenResponse instqnce containing the access token, the id token and the refresh token  
+     */
+    public OIDCTokenResponse requesToken(String callback, AuthorizationCode code) {
+
+        //Construct the code grant
+        AuthorizationGrant codeGrant = null; 
+        try {
+            codeGrant = new AuthorizationCodeGrant(code, new URI(callback)); 
+
+            // credentials for authenticating the client
+            ClientAuthentication cleintAuth = new ClientSecretBasic(clientID, clientSecret);
+
+            // token endpoint
+            URI tokendEndpoint = getProviderMetadata().getTokenEndpointURI();
+
+        }catch(URISyntaxException e) {
+            System.err.println(e.getMessage());
+        }
+        
+        return null;
     }
 }

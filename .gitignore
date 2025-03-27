@@ -5,3 +5,4 @@
 *.properties
 .config
 target/
+.notes.txt

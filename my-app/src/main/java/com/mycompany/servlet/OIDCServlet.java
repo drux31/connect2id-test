@@ -8,6 +8,8 @@ import java.util.Scanner;
 
 import com.mycompany.config.OIDCAuthnRequest;
 import com.nimbusds.oauth2.sdk.AuthorizationCode;
+import com.nimbusds.oauth2.sdk.AuthorizationCodeGrant;
+import com.nimbusds.oauth2.sdk.AuthorizationGrant;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.openid.connect.sdk.AuthenticationResponse;
 import com.nimbusds.openid.connect.sdk.AuthenticationResponseParser;
@@ -42,33 +44,37 @@ public class OIDCServlet extends HttpServlet {
         // Create an authentication response from the respone callback
         AuthenticationResponse authResponse = null;
         AuthorizationCode authCode = null ;
+        URI callback = null;
         try {
             System.out.println(request.toString());
             String reqURL = request.getRequestURL().toString() + "?" + extractPostRequestBody(request);
             System.out.println("callback: " + reqURL);
             authResponse = AuthenticationResponseParser.parse(new URI(reqURL));
-            
+            callback = new URI (request.getRequestURL().toString());
 
         } catch (ParseException | URISyntaxException e) {
             e.printStackTrace();
         }
 
         // Make sure the authentication response is valid
+        // and get the auth code
         if (oidcAuthnRequest.isValid(authResponse)) {
             authCode = authResponse.toSuccessResponse().getAuthorizationCode();
         }
+
+
+        // Construct the code grant from the code obtained from the authz endpoint
+        if (authCode != null) {
+            AuthorizationGrant codeGrant = new AuthorizationCodeGrant(authCode, callback);
+        }
+
+
         // request access token
         // print the authCode
         Object data = authCode.toString();
-    
-        //System.out.println(request.getMethod() + " " + request.getHeader("Host") + request.getRequestURI() + "\n" + request.toString() + "\n");
-        //System.out.println(request.getRequestURL());
-        //String body = extractPostRequestBody(request);
-        //System.out.println("Body request: " + body);
-        //request.setAttribute("authCode", body);
-        request.getSession().setAttribute("authCode", data);        
-        //RequestDispatcher rs = request.getRequestDispatcher(request.getContextPath() + "/welcome");
-        //rs.forward(request, response);
+        request.getSession().setAttribute("authCode", data);
+
+
         response.sendRedirect(request.getContextPath() + "/protected/welcome");
         // new ProtectedServlet().doGet(request, response);
     }

@@ -50,8 +50,17 @@ public class LoadPropertiesFIle {
      * Get the client ID from the properties
      * @return cleint ID as known by the OIDC provider
      */
-    public String getCleintID() {
+    public String getClientID() {
         return this.getProperties().getProperty("oidcprovider.client_id");
+    }
+
+
+    /**
+     * Get the client Secret from the properties
+     * @return cleint secret as known by the OIDC provider
+     */
+    public String getClientSecret() {
+        return this.getProperties().getProperty("oidcprovider.client_secret");
     }
 
 }
