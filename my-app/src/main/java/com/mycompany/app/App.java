@@ -6,9 +6,8 @@ package com.mycompany.app;
 public class App {
     public static void main(String[] args) {
         
-          //  new OIDCAuthnRequest().getAuthCode();
-
-          //  new HelloOIDC().runServer();
+        //  new OIDCAuthnRequest().getAuthCode();
+        new HelloOIDC().runServer();
         
     }
 }

@@ -46,14 +46,12 @@ public class OIDCServlet extends HttpServlet {
         // Create an authentication response from the respone callback
         AuthenticationResponse authResponse = null;
         AuthorizationCode authCode = null ;
-        URI callback = null;
         OIDCTokenResponse tokenResponse = null;
         try {
             System.out.println(request.toString());
             String reqURL = request.getRequestURL().toString() + "?" + extractPostRequestBody(request);
             System.out.println("callback: " + reqURL);
             authResponse = AuthenticationResponseParser.parse(new URI(reqURL));
-            //callback = new URI (request.getRequestURL().toString());
 
         } catch (ParseException | URISyntaxException e) {
             e.printStackTrace();
@@ -73,6 +71,7 @@ public class OIDCServlet extends HttpServlet {
             //get the ID and access token, the server may also return a refresh token
             JWT idToken = tokenResponse.getOIDCTokens().getIDToken();
             AccessToken accessToken = tokenResponse.getOIDCTokens().getAccessToken();
+            @SuppressWarnings("unused")
             RefreshToken refreshToken = tokenResponse.getOIDCTokens().getRefreshToken();
 
             if (oidcAuthnRequest.isValidToken(idToken)) {
