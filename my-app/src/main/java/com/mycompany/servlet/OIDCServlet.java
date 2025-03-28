@@ -70,6 +70,12 @@ public class OIDCServlet extends HttpServlet {
 
             //get the ID and access token, the server may also return a refresh token
             JWT idToken = tokenResponse.getOIDCTokens().getIDToken();
+            try {
+            System.out.println(idToken.getJWTClaimsSet().toJSONObject().toString());
+            } catch(java.text.ParseException e) {
+                System.err.println(e.getMessage());
+            }
+
             AccessToken accessToken = tokenResponse.getOIDCTokens().getAccessToken();
             @SuppressWarnings("unused")
             RefreshToken refreshToken = tokenResponse.getOIDCTokens().getRefreshToken();

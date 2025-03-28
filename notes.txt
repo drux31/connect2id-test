@@ -1,6 +1,0 @@
--- print request information
-/System.out.println(request.getMethod() + " " + request.getHeader("Host") + request.getRequestURI() + "\n" + request.toString() + "\n");
-//System.out.println(request.getRequestURL());
-//String body = extractPostRequestBody(request);
-//System.out.println("Body request: " + body);
-//request.setAttribute("authCode", body);

@@ -164,7 +164,7 @@ public class OIDCAuthnRequest {
             URI tokendEndpoint = oidcProviderMetadata.getTokenEndpointURI();
 
             // Make the token request
-            TokenRequest tokenRequest = new TokenRequest(tokendEndpoint, cleintAuth, codeGrant, new Scope("openid"));
+            TokenRequest tokenRequest = new TokenRequest(tokendEndpoint, cleintAuth, codeGrant, new Scope("openid profile email"));
             TokenResponse tokenResponse = OIDCTokenResponseParser.parse(tokenRequest.toHTTPRequest().send());
             successResponse = (OIDCTokenResponse)tokenResponse.toSuccessResponse();
 
