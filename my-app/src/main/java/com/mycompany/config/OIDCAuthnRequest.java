@@ -3,6 +3,7 @@ package com.mycompany.config;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.*;
+import java.util.List;
 import java.util.Scanner;
 
 import com.nimbusds.jose.JOSEException;
@@ -15,6 +16,7 @@ import com.nimbusds.oauth2.sdk.auth.ClientSecretBasic;
 import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.openid.connect.sdk.*;
+import com.nimbusds.openid.connect.sdk.claims.ClaimsSetRequest;
 import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
 import com.nimbusds.openid.connect.sdk.claims.UserInfo;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
@@ -61,14 +63,28 @@ public class OIDCAuthnRequest {
         AuthenticationRequest request = null;
         URI requestURI = null;
         try {
+
             // generate the auhtentication request
+            
             callback = new URI(loadPropertiesFIle.getCallBackURL());
             request = new AuthenticationRequest.Builder(
                 new ResponseType("code"),
-                new Scope("openid"),
+               Scope.parse("openid email profile address"),
                 clientID,
                 callback
             ).endpointURI(oidcProviderMetadata.getAuthorizationEndpointURI()).state(state).nonce(nonce).responseMode(new ResponseMode("form_post")).build();
+            
+            // Compose the request (in code flow)
+            /*
+            request = new AuthenticationRequest(
+                new URL("https://c2id.com/login"),
+                new ResponseType(ResponseType.Value.CODE),
+                Scope.parse("openid email profile address"),
+                clientID,
+                callback,
+                state,
+                nonce);
+                 */
 
             // print the request uri
             requestURI = request.toURI();
@@ -164,7 +180,8 @@ public class OIDCAuthnRequest {
             URI tokendEndpoint = oidcProviderMetadata.getTokenEndpointURI();
 
             // Make the token request
-            TokenRequest tokenRequest = new TokenRequest(tokendEndpoint, cleintAuth, codeGrant, new Scope("openid profile email"));
+            TokenRequest tokenRequest = new TokenRequest(tokendEndpoint, cleintAuth, codeGrant, new Scope("openid profile"));
+            
             TokenResponse tokenResponse = OIDCTokenResponseParser.parse(tokenRequest.toHTTPRequest().send());
             successResponse = (OIDCTokenResponse)tokenResponse.toSuccessResponse();
 
@@ -234,14 +251,16 @@ public class OIDCAuthnRequest {
      * @param accessToken - access token obtained from the earlier processes
      * @return JSON onject containing the user information
      */
-    public UserInfo getUserInfoClaims(AccessToken accessToken) {
+    public UserInfo getUserInfoClaims(AccessToken accessToken, JWT idToken) {
 
+        System.out.println(oidcProviderMetadata.getUserInfoEndpointURI());
         UserInfoRequest userInfoReq = new UserInfoRequest(oidcProviderMetadata.getUserInfoEndpointURI(), (BearerAccessToken) accessToken);
-
+        
         // fetch the response
         HTTPResponse userInfoHTTPResp = null;
         try {
             userInfoHTTPResp = userInfoReq.toHTTPRequest().send();
+
         } catch(SerializeException | IOException e) {
             System.err.println(e.getMessage());
         }
@@ -260,7 +279,15 @@ public class OIDCAuthnRequest {
             return null;
         }
 
-        UserInfoSuccessResponse userInfoSuccessResponse = (UserInfoSuccessResponse) userInfoResponse;
+        if (! userInfoResponse.indicatesSuccess()) {
+            // The request failed, e.g. due to invalid or expired token
+            System.out.println(userInfoResponse.toErrorResponse().getErrorObject().getCode());
+            System.out.println(userInfoResponse.toErrorResponse().getErrorObject().getDescription());
+            return null;
+        }
+
+        UserInfoSuccessResponse userInfoSuccessResponse = userInfoResponse.toSuccessResponse();
+        System.out.println(userInfoSuccessResponse.getUserInfo().toJSONString());
         return userInfoSuccessResponse.getUserInfo();
     }
 

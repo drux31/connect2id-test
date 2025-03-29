@@ -71,7 +71,7 @@ public class OIDCServlet extends HttpServlet {
             //get the ID and access token, the server may also return a refresh token
             JWT idToken = tokenResponse.getOIDCTokens().getIDToken();
             try {
-            System.out.println(idToken.getJWTClaimsSet().toJSONObject().toString());
+            System.out.println("Id token claims: " + idToken.getJWTClaimsSet().toJSONObject().toString());
             } catch(java.text.ParseException e) {
                 System.err.println(e.getMessage());
             }
@@ -82,7 +82,7 @@ public class OIDCServlet extends HttpServlet {
 
             if (oidcAuthnRequest.isValidToken(idToken)) {
                 subject = oidcAuthnRequest.getLoggedInUser();
-                userInfo = oidcAuthnRequest.getUserInfoClaims(accessToken);
+                userInfo = oidcAuthnRequest.getUserInfoClaims(accessToken, idToken);
             }
         }
         

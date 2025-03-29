@@ -21,7 +21,7 @@ public class HelloOIDCServlet extends HttpServlet {
         
         PrintWriter writer = response.getWriter();
         writer.append(" <form action=\"login\" method=\"GET\">\r\n")
-        .append(" <input type=\"submit\" value=\"Clieck here to login\"/>\r\n")
+        .append(" <input type=\"submit\" value=\"Click here to login\"/>\r\n")
         .append(" </form>\r\n");
         /*
          *  <form method="post" action="login">
