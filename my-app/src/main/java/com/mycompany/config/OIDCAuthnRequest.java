@@ -61,15 +61,16 @@ public class OIDCAuthnRequest {
         AuthenticationRequest request = null;
         URI requestURI = null;
         try {
+
             // generate the auhtentication request
             callback = new URI(loadPropertiesFIle.getCallBackURL());
             request = new AuthenticationRequest.Builder(
                 new ResponseType("code"),
-                new Scope("openid"),
+               Scope.parse("openid email profile address"),
                 clientID,
                 callback
             ).endpointURI(oidcProviderMetadata.getAuthorizationEndpointURI()).state(state).nonce(nonce).responseMode(new ResponseMode("form_post")).build();
-
+            
             // print the request uri
             requestURI = request.toURI();
             System.out.println("Authz URI: " + requestURI);
@@ -164,7 +165,8 @@ public class OIDCAuthnRequest {
             URI tokendEndpoint = oidcProviderMetadata.getTokenEndpointURI();
 
             // Make the token request
-            TokenRequest tokenRequest = new TokenRequest(tokendEndpoint, cleintAuth, codeGrant, new Scope("openid profile email"));
+            TokenRequest tokenRequest = new TokenRequest(tokendEndpoint, cleintAuth, codeGrant, new Scope("openid"));
+            
             TokenResponse tokenResponse = OIDCTokenResponseParser.parse(tokenRequest.toHTTPRequest().send());
             successResponse = (OIDCTokenResponse)tokenResponse.toSuccessResponse();
 
@@ -236,12 +238,14 @@ public class OIDCAuthnRequest {
      */
     public UserInfo getUserInfoClaims(AccessToken accessToken) {
 
+        System.out.println(oidcProviderMetadata.getUserInfoEndpointURI());
         UserInfoRequest userInfoReq = new UserInfoRequest(oidcProviderMetadata.getUserInfoEndpointURI(), (BearerAccessToken) accessToken);
-
+        
         // fetch the response
         HTTPResponse userInfoHTTPResp = null;
         try {
             userInfoHTTPResp = userInfoReq.toHTTPRequest().send();
+
         } catch(SerializeException | IOException e) {
             System.err.println(e.getMessage());
         }
@@ -260,7 +264,15 @@ public class OIDCAuthnRequest {
             return null;
         }
 
-        UserInfoSuccessResponse userInfoSuccessResponse = (UserInfoSuccessResponse) userInfoResponse;
+        if (! userInfoResponse.indicatesSuccess()) {
+            // The request failed, e.g. due to invalid or expired token
+            System.out.println(userInfoResponse.toErrorResponse().getErrorObject().getCode());
+            System.out.println(userInfoResponse.toErrorResponse().getErrorObject().getDescription());
+            return null;
+        }
+
+        UserInfoSuccessResponse userInfoSuccessResponse = userInfoResponse.toSuccessResponse();
+        System.out.println(userInfoSuccessResponse.getUserInfo().toJSONString());
         return userInfoSuccessResponse.getUserInfo();
     }
 

@@ -19,7 +19,6 @@ public class ProtectedServlet extends HttpServlet{
         
         //String authCode = (String)request.getAttribute("authCode");
         String name = (String) request.getSession().getAttribute("userName"); 
-        String subject = (String) request.getSession().getAttribute("userSubject");
         String email = (String) request.getSession().getAttribute("userEmail");
 
         out.append("<!DOCTYPE html>\r\n")
@@ -28,9 +27,9 @@ public class ProtectedServlet extends HttpServlet{
             .append(" <title>Protected resources</title>\r\n")
             .append(" </head>\r\n")
             .append(" <body>\r\n")
+            .append(" </form>\r\n")
             .append(" User name: ").append(name).append("!<br/>\r\n")
             .append(" User email: ").append(email).append("!<br/>\r\n")
-            .append(" User subject: ").append(subject).append("!<br/><br/>\r\n")
             .append(" </body>\r\n")
             .append("</html>\r\n");
     } 
