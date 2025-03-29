@@ -3,7 +3,6 @@ package com.mycompany.config;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.*;
-import java.util.List;
 import java.util.Scanner;
 
 import com.nimbusds.jose.JOSEException;
@@ -16,7 +15,6 @@ import com.nimbusds.oauth2.sdk.auth.ClientSecretBasic;
 import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.openid.connect.sdk.*;
-import com.nimbusds.openid.connect.sdk.claims.ClaimsSetRequest;
 import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
 import com.nimbusds.openid.connect.sdk.claims.UserInfo;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
@@ -65,7 +63,6 @@ public class OIDCAuthnRequest {
         try {
 
             // generate the auhtentication request
-            
             callback = new URI(loadPropertiesFIle.getCallBackURL());
             request = new AuthenticationRequest.Builder(
                 new ResponseType("code"),
@@ -74,18 +71,6 @@ public class OIDCAuthnRequest {
                 callback
             ).endpointURI(oidcProviderMetadata.getAuthorizationEndpointURI()).state(state).nonce(nonce).responseMode(new ResponseMode("form_post")).build();
             
-            // Compose the request (in code flow)
-            /*
-            request = new AuthenticationRequest(
-                new URL("https://c2id.com/login"),
-                new ResponseType(ResponseType.Value.CODE),
-                Scope.parse("openid email profile address"),
-                clientID,
-                callback,
-                state,
-                nonce);
-                 */
-
             // print the request uri
             requestURI = request.toURI();
             System.out.println("Authz URI: " + requestURI);
@@ -180,7 +165,7 @@ public class OIDCAuthnRequest {
             URI tokendEndpoint = oidcProviderMetadata.getTokenEndpointURI();
 
             // Make the token request
-            TokenRequest tokenRequest = new TokenRequest(tokendEndpoint, cleintAuth, codeGrant, new Scope("openid profile"));
+            TokenRequest tokenRequest = new TokenRequest(tokendEndpoint, cleintAuth, codeGrant, new Scope("openid"));
             
             TokenResponse tokenResponse = OIDCTokenResponseParser.parse(tokenRequest.toHTTPRequest().send());
             successResponse = (OIDCTokenResponse)tokenResponse.toSuccessResponse();
@@ -251,7 +236,7 @@ public class OIDCAuthnRequest {
      * @param accessToken - access token obtained from the earlier processes
      * @return JSON onject containing the user information
      */
-    public UserInfo getUserInfoClaims(AccessToken accessToken, JWT idToken) {
+    public UserInfo getUserInfoClaims(AccessToken accessToken) {
 
         System.out.println(oidcProviderMetadata.getUserInfoEndpointURI());
         UserInfoRequest userInfoReq = new UserInfoRequest(oidcProviderMetadata.getUserInfoEndpointURI(), (BearerAccessToken) accessToken);

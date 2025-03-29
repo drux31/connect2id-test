@@ -27,8 +27,6 @@ public class ProtectedServlet extends HttpServlet{
             .append(" <title>Protected resources</title>\r\n")
             .append(" </head>\r\n")
             .append(" <body>\r\n")
-            .append(" <form action=\"logout\" method=\"GET\">\r\n")
-            .append(" <input type=\"submit\" value=\"logout\"/>\r\n")
             .append(" </form>\r\n")
             .append(" User name: ").append(name).append("!<br/>\r\n")
             .append(" User email: ").append(email).append("!<br/>\r\n")
